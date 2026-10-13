@@ -244,3 +244,114 @@ td{font-variant-numeric:tabular-nums}
   #lightbox{padding:12px}
   #lightbox img{max-width:98vw;padding:6px}
 }
+
+/* ===================== extra polish ===================== */
+
+::selection{background:rgba(47,98,232,.17)}
+html{scrollbar-color:#c5cde0 transparent}
+*::-webkit-scrollbar{height:9px;width:9px}
+*::-webkit-scrollbar-thumb{background:#ccd4e4;border-radius:99px}
+*::-webkit-scrollbar-thumb:hover{background:#b3bed5}
+*::-webkit-scrollbar-track{background:transparent}
+
+/* --- hero: drifting aurora + grain --- */
+.hero{background:var(--surface)}
+.aurora{position:absolute;inset:-30% -10% auto;height:150%;pointer-events:none;filter:blur(46px);opacity:.75}
+.aurora span{position:absolute;display:block;border-radius:50%;mix-blend-mode:multiply}
+.aurora span:nth-child(1){width:46vw;height:30vw;left:4%;top:6%;
+  background:radial-gradient(circle at 30% 30%,rgba(47,98,232,.42),transparent 62%);
+  animation:drift1 22s ease-in-out infinite alternate}
+.aurora span:nth-child(2){width:40vw;height:28vw;right:2%;top:0%;
+  background:radial-gradient(circle at 60% 40%,rgba(15,156,146,.40),transparent 62%);
+  animation:drift2 26s ease-in-out infinite alternate}
+.aurora span:nth-child(3){width:34vw;height:24vw;left:34%;top:22%;
+  background:radial-gradient(circle at 50% 50%,rgba(126,86,230,.28),transparent 64%);
+  animation:drift3 30s ease-in-out infinite alternate}
+@keyframes drift1{to{transform:translate3d(8%,6%,0) scale(1.14)}}
+@keyframes drift2{to{transform:translate3d(-9%,8%,0) scale(1.1)}}
+@keyframes drift3{to{transform:translate3d(5%,-8%,0) scale(1.18)}}
+.hero .grain{
+  position:absolute;inset:0;pointer-events:none;opacity:.5;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/></filter><rect width='140' height='140' filter='url(%23n)' opacity='.38'/></svg>")
+}
+.hero .wrap{animation:riseIn .8s cubic-bezier(.2,.75,.3,1) both}
+@keyframes riseIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+/* --- buttons: sheen sweep --- */
+.btn{position:relative;overflow:hidden;isolation:isolate}
+.btn::after{
+  content:"";position:absolute;inset:0;transform:translateX(-120%) skewX(-18deg);
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.34),transparent);
+  transition:transform .65s cubic-bezier(.2,.7,.3,1)
+}
+.btn:hover::after{transform:translateX(120%) skewX(-18deg)}
+
+/* --- headings --- */
+h2{letter-spacing:-.025em}
+h2::after{width:62px;height:3px;box-shadow:0 0 12px rgba(47,98,232,.45)}
+h3{
+  border-left:0;padding-left:0;display:flex;align-items:baseline;gap:11px;letter-spacing:-.012em
+}
+h3::before{
+  content:"";flex:0 0 auto;width:7px;height:7px;border-radius:50%;
+  background:linear-gradient(135deg,var(--brand),var(--brand-2));
+  box-shadow:0 0 0 4px rgba(47,98,232,.1)
+}
+
+/* --- figure cards: glass edge + expand cue --- */
+figure.framed{position:relative;overflow:hidden}
+figure.framed::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:linear-gradient(180deg,rgba(255,255,255,.9),transparent 42%);opacity:.7
+}
+figure.framed::after{
+  content:"⤢";position:absolute;top:12px;right:12px;width:30px;height:30px;border-radius:9px;
+  display:grid;place-items:center;font-size:14px;color:var(--ink-2);
+  background:rgba(255,255,255,.82);border:1px solid var(--line);backdrop-filter:blur(6px);
+  opacity:0;transform:translateY(-4px);transition:opacity .2s ease,transform .2s ease
+}
+figure.framed:hover::after{opacity:1;transform:none}
+figure.framed:hover{transform:translateY(-2px)}
+
+/* --- equations --- */
+.eq{
+  position:relative;background:linear-gradient(180deg,#f7f9fe,#f2f5fc);
+  border:1px solid var(--line-soft);box-shadow:inset 0 1px 0 #fff
+}
+.eq::before{
+  content:"";position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:3px;
+  background:linear-gradient(180deg,var(--brand),var(--brand-2));opacity:.55
+}
+
+/* --- table --- */
+.table-wrap{position:relative}
+thead th{position:sticky;top:0;z-index:1;background:#eef1f8}
+tbody tr:not(.group):hover{background:rgba(47,98,232,.08)}
+tbody tr{transition:background .14s ease}
+
+/* --- code: window dots --- */
+.code pre{padding-top:42px;background:linear-gradient(180deg,#141a30,#0d1220)}
+.code::before{
+  content:"";position:absolute;top:16px;left:20px;width:9px;height:9px;border-radius:50%;
+  background:#ff5f57;box-shadow:17px 0 0 #febc2e,34px 0 0 #28c840;z-index:1
+}
+.code pre::after{
+  content:"";position:absolute;left:0;right:0;top:34px;height:1px;background:rgba(255,255,255,.07)
+}
+
+/* --- lightbox --- */
+#lightbox.open img{animation:pop .3s cubic-bezier(.2,.8,.3,1)}
+@keyframes pop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+
+/* --- footer --- */
+footer{background:linear-gradient(180deg,var(--surface-2),#eef1f8)}
+
+@media (prefers-reduced-motion:reduce){
+  .aurora span,.hero .wrap{animation:none}
+  .btn::after{display:none}
+}
+@media (max-width:760px){
+  .aurora{filter:blur(34px);opacity:.6}
+  figure.framed::after{display:none}
+  .code pre{padding-top:38px}
+}
