@@ -355,3 +355,18 @@ footer{background:linear-gradient(180deg,var(--surface-2),#eef1f8)}
   figure.framed::after{display:none}
   .code pre{padding-top:38px}
 }
+
+/* ---------- title color ---------- */
+.title{
+  background:none;-webkit-background-clip:border-box;background-clip:border-box;
+  color:#131a2c;font-weight:760
+}
+.title .sd{
+  background:linear-gradient(100deg,#2f62e8 0%,#5b4bdc 26%,#0f9c92 52%,#2f62e8 78%,#5b4bdc 100%);
+  background-size:260% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:hue 14s ease-in-out infinite;letter-spacing:-.035em;
+  filter:drop-shadow(0 6px 18px rgba(47,98,232,.22))
+}
+.title .colon{color:#9aa4bd;font-weight:400}
+@keyframes hue{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+@media (prefers-reduced-motion:reduce){.title .sd{animation:none}}
