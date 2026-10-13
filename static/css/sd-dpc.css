@@ -231,8 +231,7 @@ footer{
 .title{background:linear-gradient(180deg,#1b2235 0%,#0d1322 100%);
   -webkit-background-clip:text;background-clip:text;color:transparent}
 .btn{background:linear-gradient(160deg,#242c42,#101624)}
-.btn:nth-child(1){background:linear-gradient(160deg,#2f62e8,#1f49bd);border-color:transparent;
-  box-shadow:0 10px 24px -12px rgba(47,98,232,.9)}
+.btn{border-color:transparent}
 
 /* zebra + cleaner numerics */
 tbody tr:not(.group):not(.ours):nth-of-type(even){background:rgba(244,246,251,.55)}
@@ -370,3 +369,9 @@ footer{background:linear-gradient(180deg,var(--surface-2),#eef1f8)}
 .title .colon{color:#9aa4bd;font-weight:400}
 @keyframes hue{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
 @media (prefers-reduced-motion:reduce){.title .sd{animation:none}}
+
+/* arXiv glyph + author superscripts */
+.btn .ai{font-size:1.02rem;line-height:1}
+.authors sup{font-size:.62em;font-weight:600;color:var(--ink-3);padding-left:1px}
+.affil{line-height:1.6}
+.affil sup{font-size:.72em;padding-right:1px}
