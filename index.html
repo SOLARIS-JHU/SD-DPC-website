@@ -60,6 +60,8 @@
 </script>
 </head>
 <body>
+<div id="progress"></div>
+<div id="lightbox" aria-hidden="true"><img alt=""><span class="hint">click anywhere to close</span></div>
 
 <header class="hero">
   <div class="wrap">
@@ -449,6 +451,31 @@ python scripts/$CASE/evaluation.py       # evaluate on the true plant</code></pr
 </footer>
 
 <script>
+// scroll progress
+var bar = document.getElementById('progress');
+function tick(){
+  var h = document.documentElement.scrollHeight - window.innerHeight;
+  bar.style.width = (h > 0 ? (window.scrollY / h) * 100 : 0) + '%';
+}
+window.addEventListener('scroll', tick, {passive:true});
+window.addEventListener('resize', tick);
+tick();
+
+// figure lightbox
+var lb = document.getElementById('lightbox'), lbImg = lb.querySelector('img');
+document.querySelectorAll('figure img').forEach(function (img) {
+  img.addEventListener('click', function (e) {
+    e.preventDefault();
+    lbImg.src = img.currentSrc || img.src;
+    lbImg.alt = img.alt;
+    lb.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  });
+});
+function closeLb(){ lb.classList.remove('open'); document.body.style.overflow = ''; }
+lb.addEventListener('click', closeLb);
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeLb(); });
+
 if ('IntersectionObserver' in window) {
   var io = new IntersectionObserver(function (entries) {
     entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
