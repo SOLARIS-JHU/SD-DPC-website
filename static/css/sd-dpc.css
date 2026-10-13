@@ -1,5 +1,6 @@
 /* SD-DPC project page */
 :root{
+  --math:"STIX Two Math","Latin Modern Math","Cambria Math","Times New Roman",Times,serif;
   --bg:#fcfcfe;
   --surface:#ffffff;
   --surface-2:#f4f6fb;
@@ -67,7 +68,7 @@ h3:first-of-type{margin-top:4px}
 }
 .hero>*{position:relative}
 .title{
-  font-size:clamp(1.75rem,5.4vw,2.65rem);font-weight:750;max-width:20ch;margin:0 auto;
+  font-size:clamp(2.15rem,6.4vw,3.35rem);font-weight:750;max-width:19ch;margin:0 auto;
   letter-spacing:-.03em
 }
 .authors{margin:24px auto 0;font-size:1.02rem;max-width:60ch;color:var(--ink-2)}
@@ -98,8 +99,8 @@ figure img{
 }
 figure.framed:hover img{transform:scale(1.012)}
 figure.framed{
-  background:linear-gradient(180deg,#fff,#fbfcff);border:1px solid var(--line);
-  border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);
+  background:#fff;border:1px solid var(--line);
+  border-radius:var(--radius);padding:6px;box-shadow:var(--shadow);
   transition:box-shadow .25s ease,transform .25s ease
 }
 figure.framed:hover{box-shadow:0 2px 4px rgba(20,26,41,.05),0 26px 54px -26px rgba(20,26,41,.4)}
@@ -108,8 +109,7 @@ figure a:hover{opacity:.93}
 figcaption{
   color:var(--ink-3);font-size:.87rem;line-height:1.55;margin:12px auto 0;max-width:74ch;text-align:left
 }
-figure.framed figcaption{margin-bottom:0;padding-top:11px;border-top:1px solid var(--line-soft)}
-video{max-width:100%;max-height:420px;display:block;margin:0 auto;border-radius:8px;background:#fff}
+figure.framed figcaption{margin:10px 8px 6px;padding-top:10px;border-top:1px solid var(--line-soft)}
 
 /* equations */
 .eq{
@@ -136,11 +136,12 @@ tbody tr.group td{
   color:var(--ink);text-transform:uppercase
 }
 tbody tr.ours{background:rgba(47,98,232,.055)}
-tbody tr.ours td{font-weight:650;color:var(--ink)}
+tbody tr.ours td{color:var(--ink)}
 tbody tr.ours td:first-child{box-shadow:inset 3px 0 0 var(--brand)}
 td.bad{color:var(--danger);font-weight:600}
 tbody tr:last-child td{border-bottom:none}
 .notes{color:var(--ink-3);font-size:.86rem;line-height:1.6;margin-top:16px}
+tbody td strong{font-weight:700;color:var(--ink)}
 
 /* ---------- code ---------- */
 .code{position:relative;margin-top:18px}
@@ -182,7 +183,7 @@ footer{
   h2{margin-bottom:20px}
   h3{margin:28px 0 10px;padding-left:11px}
   figure{margin-top:20px}
-  figure.framed{padding:12px;border-radius:12px}
+  figure.framed{padding:5px;border-radius:12px}
   figcaption{font-size:.87rem}
   .eq{padding:2px 12px;font-size:.92rem}
   .code pre{padding:16px;font-size:.78rem}
@@ -299,10 +300,7 @@ h3::before{
 
 /* --- figure cards: glass edge + expand cue --- */
 figure.framed{position:relative;overflow:hidden}
-figure.framed::before{
-  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
-  background:linear-gradient(180deg,rgba(255,255,255,.9),transparent 42%);opacity:.7
-}
+
 figure.framed::after{
   content:"⤢";position:absolute;top:12px;right:12px;width:30px;height:30px;border-radius:9px;
   display:grid;place-items:center;font-size:14px;color:var(--ink-2);
@@ -375,3 +373,186 @@ footer{background:linear-gradient(180deg,var(--surface-2),#eef1f8)}
 .authors sup{font-size:.62em;font-weight:600;color:var(--ink-3);padding-left:1px}
 .affil{line-height:1.6}
 .affil sup{font-size:.72em;padding-right:1px}
+
+
+/* bigger graphical abstract; wide (landscape) figures break out of the text column */
+figure.big img{max-height:560px}
+figure.wide{width:100%;margin-left:0}
+figure.wide img{max-height:none;width:100%}
+figure.wide figcaption{max-width:74ch;margin-left:auto;margin-right:auto}
+
+/* notebook buttons */
+.btn.nb{background:#fff;color:var(--ink-2);border:1px solid var(--line);
+  box-shadow:0 6px 16px -12px rgba(20,26,41,.5);font-weight:550;font-size:.9rem;padding:9px 16px}
+.btn.nb:hover{color:var(--ink);border-color:rgba(47,98,232,.4)}
+.btn.nb svg{width:15px;height:15px;color:#e8710a}
+.links{max-width:760px;margin-left:auto;margin-right:auto}
+
+@media (max-width:760px){
+  figure.big img{max-height:360px}
+
+}
+.links .brk{flex-basis:100%;height:0;margin:0}
+@media (max-width:420px){.links .brk{display:none}}
+.links .try{align-self:center;color:var(--ink-3);font-size:.92rem;font-weight:550;margin-right:2px}
+@media (max-width:420px){.links .try{width:100%;text-align:center;margin:2px 0 -2px}}
+
+/* interactive replay of the policy training run (sits under the video) */
+.explorer{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:16px 18px 14px;margin-top:22px
+}
+.explorer .pe-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px}
+@media (max-width:640px){.explorer .pe-grid{grid-template-columns:1fr}}
+.explorer .pe-cell{min-width:0}
+.explorer .pe-label{
+  font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);
+  font-weight:600;margin:0 0 6px;text-align:left
+}
+.explorer canvas{display:block;width:100%;border-radius:6px}
+.explorer .pe-bar{
+  display:flex;align-items:center;gap:12px;margin-top:14px;padding-top:12px;
+  border-top:1px solid var(--line-soft);flex-wrap:wrap
+}
+.explorer .pe-bar input[type=range]{flex:1 1 180px;min-width:140px;accent-color:var(--brand);margin:0}
+.explorer .pe-bar button{
+  font:inherit;font-size:.82rem;font-weight:600;padding:5px 14px;border-radius:8px;
+  border:1px solid var(--line);background:var(--surface-2);color:var(--ink-2);cursor:pointer
+}
+.explorer .pe-bar button:hover{border-color:var(--brand);color:var(--brand)}
+.explorer .pe-readout{
+  font-size:.84rem;color:var(--ink-2);font-variant-numeric:tabular-nums;flex:1 1 100%
+}
+.explorer .pe-readout strong{color:var(--ink)}
+.explorer.is-loading .pe-readout::after{content:"loading training history\2026"}
+.explorer .pe-legend{
+  display:flex;gap:16px;flex-wrap:wrap;font-size:.78rem;color:var(--ink-3);margin-top:10px
+}
+.explorer .pe-legend i{display:inline-block;width:20px;border-top:2px solid currentColor;margin-right:6px;vertical-align:middle;font-style:normal}
+.explorer .pe-try{margin-top:12px;padding-top:12px;border-top:1px solid var(--line-soft)}
+.explorer .pe-try-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.explorer .pe-try-head span{font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.explorer .pe-knobs{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px 18px}
+.explorer .pe-knobs label{display:grid;gap:3px;font-size:.8rem;color:var(--ink-2)}
+.explorer .pe-knobs output{float:right;font-family:var(--mono);font-size:.76rem;color:var(--ink);font-variant-numeric:tabular-nums}
+.explorer .pe-knobs input[type=range]{width:100%;accent-color:var(--brand);margin:0}
+.explorer .pe-try-head button{font:inherit;font-size:.78rem;font-weight:600;padding:4px 11px;border-radius:7px;
+  border:1px solid var(--line);background:var(--surface-2);color:var(--ink-2);cursor:pointer}
+.explorer .pe-try-head button:hover{border-color:var(--brand);color:var(--brand)}
+.explorer .pe-edited{color:var(--brand);font-weight:600}
+/* explore mode: the loss history steps aside and the controls take its place */
+.explorer .pe-try{display:none}
+.explorer.is-explore .pe-try{display:block}
+.explorer.is-explore .pe-loss-cell{display:none}
+.explorer.is-explore .pe-bar input[type=range]{opacity:.55}
+.explorer .pe-mode{margin-left:auto}
+.explorer .pe-mode[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:#fff}
+.explorer .pe-try-note{font-size:.84rem;color:var(--ink-3);margin:0 0 10px}
+.explorer .pe-edit{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-bottom:14px}
+@media (max-width:640px){.explorer .pe-edit{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.explorer .pe-edit-cell{display:grid;gap:2px;justify-items:center}
+.explorer .pe-edit-cell span{font-size:1rem;line-height:1.1;color:var(--ink-3)}
+.explorer .pe-edit-cell.is-set span{color:var(--ink)}
+.explorer .pe-edit-cell input{
+  width:100%;text-align:center;font-family:var(--mono);font-size:.78rem;padding:4px 2px;
+  border:1px solid var(--line);border-radius:6px;background:var(--surface-2);color:var(--ink)
+}
+.explorer .pe-edit-cell.is-set input{border-color:var(--brand);color:var(--brand);font-weight:600}
+.explorer .pe-edit-cell input:focus{outline:2px solid var(--brand);outline-offset:1px}
+.explorer.is-explore .pe-coef-cell{display:none}
+
+/* coefficient term labels, typeset with MathJax under the coefficient row */
+.explorer .pe-coef-terms{
+  display:grid;grid-template-columns:repeat(14,1fr);align-items:center;
+  margin-top:7px;text-align:center;line-height:1.1
+}
+.explorer .pe-coef-terms span{font-size:1.02rem;color:var(--ink-3);transition:color .15s ease}
+.explorer .pe-coef-terms span.is-on{color:var(--ink)}
+.explorer .pe-coef-terms span.is-off{color:#aeb6c8}
+.explorer .pe-coef-terms mjx-container{margin:0 !important}
+@media (max-width:760px){
+  .explorer .pe-coef-terms span{font-size:.8rem}
+  .explorer .pe-edit-cell span{font-size:.88rem}
+}
+
+/* coefficient value cells */
+.explorer .pe-coef-row{
+  display:grid;grid-template-columns:repeat(14,1fr);gap:3px;
+  border-radius:9px;overflow:hidden
+}
+.explorer .pe-coef-cellbox{
+  display:flex;align-items:center;justify-content:center;height:40px;
+  border-radius:7px;background:#fff;border:1px solid var(--line-soft);
+  font-family:var(--math);font-size:1.05rem;font-weight:600;letter-spacing:.005em;
+  font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1,"zero" 1;
+  color:var(--ink);transition:background .18s ease,color .18s ease
+}
+.explorer .pe-coef-cellbox.is-strong{color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.25)}
+.explorer .pe-coef-cellbox.is-zero{background:var(--surface-2);color:#aeb6c8;font-weight:500}
+@media (max-width:760px){
+  /* keep the 14 cells legible: scroll the block instead of crushing it */
+  .explorer .pe-coef-cell{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+  .explorer .pe-coef-row,.explorer .pe-coef-terms{min-width:520px}
+  .explorer .pe-coef-row{gap:2px}
+  .explorer .pe-coef-cellbox{height:34px;font-size:.88rem;border-radius:6px}
+  .explorer .pe-coef-terms span{font-size:.86rem}
+}
+
+/* brief theory statements */
+.theory{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));margin:18px 0 20px}
+.thm{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:16px 18px;box-shadow:var(--shadow)
+}
+.thm.is-key{border-color:rgba(47,98,232,.45)}
+.thm-tag{
+  font:600 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;
+  color:var(--brand-2);margin:0 0 7px
+}
+.thm.is-key .thm-tag{color:var(--brand)}
+.thm-head{font-size:1rem;font-weight:600;color:var(--ink);margin:0 0 7px;letter-spacing:-.01em}
+.thm p:last-child{font-size:.93rem;line-height:1.6;color:var(--ink-2)}
+.explorer .pe-lip-cell canvas{width:100%}
+@media (max-width:760px){
+  .theory{grid-template-columns:1fr;gap:10px}
+  .thm{padding:14px 15px}
+}
+
+/* algorithm block, set like the paper float */
+.algo{
+  margin:20px 0 22px;background:var(--surface);border-top:2px solid var(--ink);
+  border-bottom:2px solid var(--ink);padding:12px 2px 14px
+}
+.algo-head{
+  font-size:.98rem;color:var(--ink);margin:0 0 9px;padding-bottom:9px;
+  border-bottom:1px solid var(--line)
+}
+.algo-head span{font-weight:700;margin-right:8px}
+.algo-req{
+  font-size:.86rem;line-height:1.55;color:var(--ink-2);margin:0 0 10px;
+  padding-bottom:10px;border-bottom:1px solid var(--line-soft)
+}
+.algo-req em{font-style:normal;font-weight:600;color:var(--ink)}
+.algo-body{counter-reset:algoline;list-style:none;margin:0;padding:0}
+.algo-body li{
+  counter-increment:algoline;position:relative;padding:1px 0 1px 38px;
+  font-size:.92rem;line-height:1.75;color:var(--ink-2)
+}
+.algo-body li::before{
+  content:counter(algoline);position:absolute;left:0;width:26px;text-align:right;
+  font:400 .78rem/1.9 var(--mono);color:var(--ink-3)
+}
+.algo-body li b{font-weight:700;color:var(--ink)}
+.algo-body li.i1{padding-left:58px}
+.algo-body li.i2{padding-left:78px}
+.algo-body li.i3{padding-left:98px}
+.algo-note{
+  font:400 .76rem var(--mono);color:var(--ink-3);margin-left:8px;
+  padding:1px 6px;border-radius:5px;background:var(--surface-2)
+}
+@media (max-width:760px){
+  .algo-body li{font-size:.86rem;padding-left:32px}
+  .algo-body li.i1{padding-left:46px}
+  .algo-body li.i2{padding-left:60px}
+  .algo-body li.i3{padding-left:74px}
+}
