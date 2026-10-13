@@ -28,6 +28,7 @@
 <meta name="citation_arxiv_id" content="2610.02466">
 <meta name="citation_pdf_url" content="https://arxiv.org/pdf/2610.02466.pdf">
 
+<script>document.documentElement.classList.add("js");</script>
 <link rel="icon" type="image/x-icon" href="static/images/favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -83,8 +84,8 @@
 <main>
 
 <section>
-  <div class="wrap">
-    <figure>
+  <div class="wrap reveal">
+    <figure class="framed">
       <a href="static/pdfs/method.pdf" target="_blank" rel="noopener">
         <img src="static/images/method.png" alt="SD-DPC pipeline: rollout-based sparse identification followed by differentiable predictive control policy learning with pruning and debiasing">
       </a>
@@ -96,7 +97,7 @@
 </section>
 
 <section>
-  <div class="wrap">
+  <div class="wrap reveal">
     <h2>Abstract</h2>
     <p>
       We present sparse dictionary differentiable predictive control (SD-DPC), a framework for learning
@@ -120,7 +121,7 @@
 </section>
 
 <section>
-  <div class="wrap">
+  <div class="wrap reveal">
     <h2>Methodology</h2>
     <p>
       SD-DPC proceeds in two stages. Both are instances of the same sequentially thresholded gradient
@@ -239,7 +240,7 @@
 </section>
 
 <section>
-  <div class="wrap">
+  <div class="wrap reveal">
     <h2>Results</h2>
 
     <h3>Identified models</h3>
@@ -274,7 +275,7 @@
       state and control trajectories together with the coefficient matrix as sequential thresholding
       removes dictionary terms. Pruned terms remain visible with coefficients fixed at zero.
     </p>
-    <figure>
+    <figure class="framed">
       <video controls muted loop playsinline preload="metadata" poster="static/images/policy_evolution_preview.gif">
         <source src="static/videos/policy_evolution.mp4" type="video/mp4">
       </video>
@@ -394,7 +395,7 @@
 </section>
 
 <section>
-  <div class="wrap">
+  <div class="wrap reveal">
     <h2>Code</h2>
     <p>
       The implementation uses Python 3.10, PyTorch 2.6 and Neuromancer 1.5.3, with CasADi for the
@@ -416,7 +417,7 @@ python scripts/$CASE/evaluation.py       # evaluate on the true plant</code></pr
 </section>
 
 <section>
-  <div class="wrap">
+  <div class="wrap reveal">
     <p class="notes" style="margin-bottom:26px">
       This research is supported by the U.S. Department of Energy, Office of Science, ASCR program under
       the SciDAC Institute &ldquo;LEADS: LEarning-Accelerated Domain Science&rdquo;.
@@ -448,6 +449,14 @@ python scripts/$CASE/evaluation.py       # evaluate on the true plant</code></pr
 </footer>
 
 <script>
+if ('IntersectionObserver' in window) {
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, {rootMargin: '0px 0px -8% 0px', threshold: 0.04});
+  document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
+} else {
+  document.querySelectorAll('.reveal').forEach(function (el) { el.classList.add('in'); });
+}
 document.querySelectorAll('.copy').forEach(function (btn) {
   btn.addEventListener('click', function () {
     navigator.clipboard.writeText(document.querySelector(btn.dataset.copy).innerText).then(function () {
