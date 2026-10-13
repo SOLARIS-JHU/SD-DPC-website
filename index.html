@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SD-DPC: Sparse Dictionary Differentiable Predictive Control</title>
+
+<meta name="description" content="SD-DPC learns sparse, interpretable feedback policies for nonlinear systems by differentiating a constrained predictive-control objective through a sparsely identified model.">
+<meta name="keywords" content="differentiable predictive control, SINDy, sparse identification, interpretable control, explicit MPC, constrained control, symbolic policy, nonlinear systems">
+<meta name="author" content="Ali Reza Daneshvar Garmroodi, Jan Drgona">
+<meta name="robots" content="index, follow">
+
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="SOLARIS Lab, Johns Hopkins University">
+<meta property="og:title" content="SD-DPC: Sparse Dictionary Differentiable Predictive Control">
+<meta property="og:description" content="A three-term feedback law, trained in closed loop, that satisfies constraints and runs in 17 microseconds.">
+<meta property="og:url" content="https://solaris-jhu.github.io/SD-DPC/">
+<meta property="og:image" content="https://solaris-jhu.github.io/SD-DPC/static/images/evaluation.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="SD-DPC: Sparse Dictionary Differentiable Predictive Control">
+<meta name="twitter:description" content="A three-term feedback law, trained in closed loop, that satisfies constraints and runs in 17 microseconds.">
+<meta name="twitter:image" content="https://solaris-jhu.github.io/SD-DPC/static/images/evaluation.png">
+
+<meta name="citation_title" content="SD-DPC: Sparse Dictionary Differentiable Predictive Control">
+<meta name="citation_author" content="Daneshvar Garmroodi, Ali Reza">
+<meta name="citation_author" content="Drgona, Jan">
+<meta name="citation_publication_date" content="2026">
+<meta name="citation_arxiv_id" content="2610.02466">
+<meta name="citation_pdf_url" content="https://arxiv.org/pdf/2610.02466.pdf">
+<meta name="theme-color" content="#2f6df6">
+
+<link rel="icon" type="image/x-icon" href="static/images/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="static/css/sd-dpc.css">
+
+<script>
+  window.MathJax = {
+    tex: {inlineMath: [['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']]},
+    options: {skipHtmlTags: ['script','noscript','style','textarea','pre','code']}
+  };
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"ScholarlyArticle",
+  "headline":"SD-DPC: Sparse Dictionary Differentiable Predictive Control",
+  "author":[
+    {"@type":"Person","name":"Ali Reza Daneshvar Garmroodi","affiliation":{"@type":"Organization","name":"Concordia University"}},
+    {"@type":"Person","name":"Jan Drgona","affiliation":{"@type":"Organization","name":"Johns Hopkins University"}}
+  ],
+  "datePublished":"2026",
+  "url":"https://solaris-jhu.github.io/SD-DPC/",
+  "image":"https://solaris-jhu.github.io/SD-DPC/static/images/evaluation.png",
+  "keywords":["differentiable predictive control","sparse identification of nonlinear dynamics","interpretable control","constrained control"],
+  "isAccessibleForFree":true
+}
+</script>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap">
+    <span class="brand">SD&#8209;DPC</span>
+    <ul>
+      <li><a href="#abstract">Abstract</a></li>
+      <li><a href="#method">Method</a></li>
+      <li><a href="#training">Training</a></li>
+      <li><a href="#cases">Case studies</a></li>
+      <li><a href="#results">Results</a></li>
+      <li><a href="#code">Code</a></li>
+      <li><a href="#bibtex">BibTeX</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="badges">
+      <span class="badge">Preprint 2026</span>
+      <span class="badge">Sparse dictionary policies</span>
+      <span class="badge">Constraints in closed loop</span>
+    </div>
+
+    <h1 class="title"><span class="sd">SD-DPC</span>: Sparse Dictionary<br>Differentiable Predictive Control</h1>
+    <p class="subtitle">
+      Learning feedback laws you can read: a handful of dictionary terms, selected by a
+      constrained predictive-control objective rather than by imitating a neural controller.
+    </p>
+
+    <div class="authors">
+      <a href="mailto:alireza.daneshvargarmroodi@mail.concordia.ca">Ali Reza Daneshvar Garmroodi</a><sup>1</sup>
+      &nbsp;&nbsp;
+      <a href="mailto:jdrgona1@jh.edu">Jan Drgo&#328;a</a><sup>2</sup>
+    </div>
+    <div class="affil">
+      <sup>1</sup>Concordia University, Montreal&nbsp; &middot; &nbsp;<sup>2</sup>Johns Hopkins University, Baltimore
+    </div>
+
+    <div class="links">
+      <a class="btn primary" href="https://arxiv.org/abs/2610.02466" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 2h8l6 6v14H6zM14 2v6h6"/></svg>
+        Paper
+      </a>
+      <a class="btn" href="https://arxiv.org/pdf/2610.02466.pdf" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v12l4-4 1.4 1.4L12 18.8 5.6 12.4 7 11l4 4V3z"/><path d="M4 20h16v2H4z"/></svg>
+        PDF
+      </a>
+      <a class="btn" href="https://github.com/SOLARIS-JHU/SD-DPC" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5A11.5 11.5 0 0 0 .5 12a11.5 11.5 0 0 0 7.9 10.9c.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.8 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.5-2.7 5.5-5.3 5.8.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A11.5 11.5 0 0 0 23.5 12A11.5 11.5 0 0 0 12 .5z"/></svg>
+        Code
+      </a>
+      <a class="btn" href="static/pdfs/evaluation.pdf" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h2v18H3zM7 13h3v8H7zM12 8h3v13h-3zM17 11h3v10h-3z"/></svg>
+        Figures
+      </a>
+    </div>
+
+    <!-- punchline card -->
+    <div class="punch">
+      <div class="punch-head"><span class="dot"></span> the learned Van der Pol policy, in full</div>
+      <div class="punch-body">
+        <div class="eq">
+          $$u_t=\Pi_{[-5,5]}\!\Big(-0.9873\,x_1-2.8860\,x_2+0.2716\,x_1^2x_2\Big)$$
+        </div>
+      </div>
+      <div class="punch-foot">
+        <div><b>3</b><span>dictionary terms</span></div>
+        <div><b>17&nbsp;&micro;s</b><span>per control step</span></div>
+        <div><b>0.023&nbsp;kB</b><span>policy memory</span></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<section id="abstract">
+  <div class="wrap narrow">
+    <div class="eyebrow">Abstract</div>
+    <h2 class="sec">Sparse, interpretable policies, trained in closed loop</h2>
+    <p class="lede" style="margin-top:18px">
+      We present sparse dictionary differentiable predictive control (SD-DPC), a framework for
+      learning sparse, interpretable feedback policies for nonlinear systems from data. A prediction
+      model is first identified by rollout-based sparse identification of nonlinear dynamics (SINDy),
+      building on gradient-based and multistep formulations. The policy is then parameterized as a
+      sparse combination of dictionary functions and trained by differentiating a constrained
+      finite-horizon predictive-control objective through this model, so that its terms are selected
+      by closed-loop performance rather than by imitating a previously trained controller. The result
+      is an explicit feedback law with only a handful of terms. Across three benchmark control
+      problems, SD-DPC satisfies the constraints in all test scenarios, outperforms a policy
+      distilled onto the same terms by up to an order of magnitude, and requires orders of magnitude
+      less memory and online computation than an optimization benchmark, while admitting explicit
+      sensitivity bounds.
+    </p>
+  </div>
+</section>
+
+<section id="method">
+  <div class="wrap">
+    <div class="eyebrow">Method</div>
+    <h2 class="sec">Two sparse stages, one thresholded gradient procedure</h2>
+    <p class="lede" style="margin-top:14px">
+      The prediction model and the feedback law are both sparse expansions over explicit
+      dictionaries, and both are sparsified by the same sequentially thresholded gradient descent.
+      Nothing in the pipeline imitates a pretrained controller.
+    </p>
+
+    <div class="fig-side">
+      <figure class="plain">
+        <a href="static/pdfs/method.pdf" target="_blank" rel="noopener">
+          <img src="static/images/method.png" alt="SD-DPC pipeline: rollout-based sparse identification, then differentiable predictive control policy learning with pruning and debiasing">
+        </a>
+      </figure>
+      <div>
+        <div class="grid c2" style="margin-top:0">
+          <div class="card">
+            <span class="num">STAGE 01</span>
+            <h3>Rollout-based sparse identification</h3>
+            <p>The dynamics are fit from multistep rollout error instead of state derivatives, so numerical
+            differentiation never enters the objective. With a one-step horizon and an Euler step it
+            collapses back to standard &#8467;<sub>1</sub>-SINDy.</p>
+          </div>
+          <div class="card">
+            <span class="num">STAGE 02</span>
+            <h3>Sparse dictionary policy</h3>
+            <p>The policy is a dictionary expansion projected onto the admissible inputs, so input bounds
+            hold by construction and each channel keeps its own subset of terms.</p>
+          </div>
+        </div>
+        <div class="policy">
+          <div class="label">closed-loop policy objective</div>
+          $$\min_{\Xi_{\pi}}\ \frac{1}{m}\sum_{j=1}^{m}\Big(\sum_{t=1}^{N}\ell_{\mathrm{DPC}}(x_t,u_{t-1},\psi_t)+\ell_N(x_N,\psi_N)\Big)+\lambda_\pi\|\Xi_\pi\|_1$$
+          $$x_{t+1}=F_{\Xi}(x_t,u_t),\qquad u_t=\pi_{\Xi_\pi}(z_t)=\Pi_{\mathcal U}\big(\Theta_\pi(z_t)\,\Xi_\pi\big)$$
+        </div>
+      </div>
+    </div>
+
+    <div class="grid c3">
+      <div class="card">
+        <span class="num">GRADIENTS THROUGH SATURATION</span>
+        <h3>A leaky projection surrogate</h3>
+        <p>The forward pass evaluates the true saturated loop; the backward pass uses a banded, leaky
+        derivative so coefficients feeding a saturated channel are neither silenced nor credited with
+        sensitivity the plant does not have.</p>
+      </div>
+      <div class="card">
+        <span class="num">FINITE TERMINATION</span>
+        <h3>Pruning that provably stops</h3>
+        <p>A pruned coefficient never returns, so the retained set changes at most \(pn\) times and the
+        thresholding loop terminates within \(n_pM(pn+1)\) epochs &mdash; for any loss.</p>
+      </div>
+      <div class="card">
+        <span class="num">EXPLICIT SENSITIVITY</span>
+        <h3>Lipschitz bounds from coefficients</h3>
+        <p>\(L_\pi\) is read off the retained coefficients and the library slopes. On the benchmarks the
+        certificate is conservative by a factor of at most 1.7 &mdash; no layer-norm products or SDP
+        relaxations needed.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="training">
+  <div class="wrap">
+    <div class="eyebrow">Training dynamics</div>
+    <h2 class="sec">Watch the policy get sparse</h2>
+    <p class="lede" style="margin-top:14px">
+      Closed-loop states, the control signal, and the coefficient matrix during sparse policy
+      learning on the Van der Pol oscillator. Pruned terms stay visible with their coefficients
+      pinned at zero &mdash; by the end, three terms carry the whole controller.
+    </p>
+    <figure>
+      <video controls muted loop playsinline preload="metadata" poster="static/images/policy_evolution_preview.gif">
+        <source src="static/videos/policy_evolution.mp4" type="video/mp4">
+      </video>
+      <figcaption>Sequential thresholding during SD-DPC policy training. After the retained set
+      stabilizes, a debiasing refit drops the &#8467;<sub>1</sub> penalty and re-tunes only the surviving coefficients.</figcaption>
+    </figure>
+
+    <div class="fig-side" style="margin-top:44px">
+      <div>
+        <h3 style="font-size:1.15rem;margin-bottom:10px">The price of sparsity is system dependent</h3>
+        <p style="color:var(--ink-2);margin:0">
+          The retained terms depend jointly on the &#8467;<sub>1</sub> weight \(\lambda_\pi\) and the pruning threshold
+          \(\tau_\pi\). We keep the sparsest policy whose validation performance is not degraded relative
+          to the dense end of the sweep. For the Van der Pol oscillator the loss is flat across the
+          sweep; for the two-tank system it degrades once \(\lambda_\pi\) is pushed past the selected point.
+        </p>
+      </div>
+      <figure class="plain">
+        <img src="static/images/sweeps.png" alt="Policy sparsity versus the l1 weight, with validation loss encoded by color and the selected policies circled">
+      </figure>
+    </div>
+
+    <figure>
+      <img src="static/images/identification.png" alt="Held-out rollouts of the identified sparse dynamics for the two-tank, Van der Pol, and 2-D integrator systems">
+      <figcaption>Held-out rollouts of the identified models. Over \(N=50\) steps the mean-squared errors are
+      \(7.64\times10^{-10}\), \(3.30\times10^{-8}\) and \(4.71\times10^{-7}\), with maximum absolute state error
+      below \(1.37\times10^{-3}\). Policies are trained on these models and then evaluated on the true plants,
+      so every reported number includes model mismatch.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="cases">
+  <div class="wrap">
+    <div class="eyebrow">Case studies</div>
+    <h2 class="sec">Three problems, three readable controllers</h2>
+
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" aria-selected="true" data-tab="tt">Two-tank tracking</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="vdp">Van der Pol</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="di">Obstacle avoidance</button>
+    </div>
+
+    <div class="panel" data-panel="tt" data-active="true">
+      <div class="meta">
+        <span class="chip">constrained level tracking</span>
+        <span class="chip">2 states &middot; 2 inputs</span>
+        <span class="chip">6 retained terms (4 + 2)</span>
+      </div>
+      <p style="color:var(--ink-2);max-width:72ch">
+        A pump feeds an upper tank that drains into a lower one. The policy tracks time-varying level
+        references while respecting level bounds, and beats the neural DPC policy by roughly
+        <strong>12&times;</strong> in tracking loss. Distilling onto the same six terms leaves a steady offset
+        and 17&times; the error.
+      </p>
+      <div class="policy">
+        <div class="label">learned raw channel outputs, \(u=\Pi_{[0,1]^2}(v)\)</div>
+        $$\begin{aligned}
+        v_1 &= 0.6198\,r + 1.4659\cos 2x_1 + 2.1415\cos 2x_2 - 3.4944\cos 2r,\\
+        v_2 &= -4.2401\cos 2x_1 + 4.2429\cos 2x_2.
+        \end{aligned}$$
+      </div>
+      <p style="color:var(--ink-3);font-size:.92rem">
+        The pump command mixes a reference feedforward with feedback on both levels; the two nearly
+        equal valve coefficients open the valve only when the upper tank is fuller than the lower one.
+      </p>
+    </div>
+
+    <div class="panel" data-panel="vdp">
+      <div class="meta">
+        <span class="chip">limit-cycle suppression</span>
+        <span class="chip">2 states &middot; 1 input</span>
+        <span class="chip">3 retained terms</span>
+      </div>
+      <p style="color:var(--ink-2);max-width:72ch">
+        The uncontrolled oscillator converges to an attracting limit cycle around an unstable origin.
+        SD-DPC stabilizes the origin from initial conditions on and off the cycle, matching the neural
+        policy's loss with three terms &mdash; and the resulting closed loop is simple enough to analyze
+        by hand.
+      </p>
+      <div class="policy">
+        <div class="label">closed-form stability certificate</div>
+        $$V=\tfrac12(1-\kappa_1)x_1^2+\tfrac12x_2^2,\qquad
+        \dot V=(\mu+\kappa_2)x_2^2-(\mu-\kappa_3)x_1^2x_2^2\le 0$$
+        $$\text{for }\ \kappa_1<1,\ \ \kappa_2<-\mu,\ \ \kappa_3\le\mu
+        \quad\text{(all satisfied by the learned }\kappa\text{)}$$
+      </div>
+      <p style="color:var(--ink-3);font-size:.92rem">
+        Because the model and the policy are finite expansions over analytic libraries, the unsaturated
+        closed loop is available in closed form: the learned coefficients render the origin globally
+        asymptotically stable.
+      </p>
+    </div>
+
+    <div class="panel" data-panel="di">
+      <div class="meta">
+        <span class="chip">nonlinear state constraint</span>
+        <span class="chip">2 states &middot; 2 inputs</span>
+        <span class="chip">12 retained terms (8 + 4)</span>
+      </div>
+      <p style="color:var(--ink-2);max-width:72ch">
+        A planar integrator must reach a setpoint whose direct path is blocked by a circular obstacle.
+        SD-DPC steers around it from every sampled initial condition, with cumulative control effort
+        within <strong>0.6%</strong> of the IPOPT optimum. The distilled policy on the same terms violates the
+        obstacle in <strong>60.8%</strong> of scenarios &mdash; which is the point of the example.
+      </p>
+      <div class="policy">
+        <div class="label">why imitation gives no safety guarantee</div>
+        $$\varepsilon_\pi\ge 0.35 \ \Rightarrow\ \text{teacher margin needed } h_{\mathrm{obs}}\ge L_hL_u\varepsilon_\pi\ge 1.05,
+        \qquad \text{actual margin } 0.06$$
+      </div>
+      <p style="color:var(--ink-3);font-size:.92rem">
+        The imitation error is small on the states the teacher visits, where the regression data lie, but
+        grows on the states the student visits. A near-optimal teacher clears the obstacle by only 0.06,
+        so no margin is left to absorb it.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section id="results">
+  <div class="wrap">
+    <div class="eyebrow">Results</div>
+    <h2 class="sec">Constraints met, two orders of magnitude smaller</h2>
+    <p class="lede" style="margin-top:14px">
+      Every controller is evaluated on the true plant over 500 held-out scenarios. SD-DPC evaluates in
+      17&nbsp;&micro;s and stores under 0.1&nbsp;kB across all three systems &mdash; versus 5&nbsp;kB for the neural
+      policy and 18&ndash;26&nbsp;MiB per IPOPT solve.
+    </p>
+
+    <figure>
+      <a href="static/pdfs/evaluation.pdf" target="_blank" rel="noopener">
+        <img src="static/images/evaluation.png" alt="Closed-loop trajectories of SD-DPC, NN-DPC, NN-Distilled and the IPOPT benchmark for the three case studies, with retained SD-DPC coefficients">
+      </a>
+      <figcaption>Closed-loop trajectories with the retained SD-DPC coefficients, for (a) the two-tank
+      system, (b) the forced Van der Pol oscillator, and (c) the 2-D integrator with obstacle avoidance.
+      Click to open the vector version.</figcaption>
+    </figure>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Task loss [10<sup>&minus;3</sup>]</th>
+            <th>Control effort</th>
+            <th>Time [&micro;s] / memory</th>
+            <th>Violations [%] / depth</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="group"><td colspan="5">Two-tank</td></tr>
+          <tr><td>IPOPT</td><td>8.8&times;10<sup>&minus;6</sup></td><td>&mdash;</td><td>8444 / 26 MiB</td><td>0.0 / &mdash;</td></tr>
+          <tr><td>NN-DPC</td><td>0.144 &plusmn; 0.013</td><td>&mdash;</td><td>30 / 5.01 kB</td><td>0.0 / &mdash;</td></tr>
+          <tr class="ours"><td>SD-DPC</td><td class="good">0.012 &plusmn; 0.006</td><td>&mdash;</td><td class="good">17 / 0.047 kB</td><td>0.0 / &mdash;</td></tr>
+          <tr><td>NN-Distilled</td><td>0.209 &plusmn; 0.039</td><td>&mdash;</td><td>17 / 0.047 kB</td><td>0.0 / &mdash;</td></tr>
+
+          <tr class="group"><td colspan="5">Van der Pol</td></tr>
+          <tr><td>IPOPT</td><td>4.6&times;10<sup>&minus;24</sup></td><td>&mdash;</td><td>301 / 19 MiB</td><td>0.0 / &mdash;</td></tr>
+          <tr><td>NN-DPC</td><td>41.0 &plusmn; 124.4</td><td>&mdash;</td><td>29 / 5.01 kB</td><td>0.0 / &mdash;</td></tr>
+          <tr class="ours"><td>SD-DPC</td><td>49.9 &plusmn; 126.4</td><td>&mdash;</td><td class="good">17 / 0.023 kB</td><td>0.0 / &mdash;</td></tr>
+          <tr><td>NN-Distilled</td><td>96.8 &plusmn; 183.8</td><td>&mdash;</td><td>17 / 0.023 kB</td><td>0.0 / &mdash;</td></tr>
+
+          <tr class="group"><td colspan="5">2-D integrator</td></tr>
+          <tr><td>IPOPT</td><td>0.000 &plusmn; 0.000</td><td>12.00 &plusmn; 1.18</td><td>1841 / 18 MiB</td><td>0.0 / &mdash;</td></tr>
+          <tr><td>NN-DPC</td><td>0.298 &plusmn; 0.560</td><td>12.00 &plusmn; 1.16</td><td>28 / 5.01 kB</td><td>0.0 / &mdash;</td></tr>
+          <tr class="ours"><td>SD-DPC</td><td>4.75 &plusmn; 4.79</td><td>12.07 &plusmn; 1.12</td><td class="good">17 / 0.094 kB</td><td>0.0 / &mdash;</td></tr>
+          <tr><td>NN-Distilled</td><td>62.6 &plusmn; 58.0</td><td>12.07 &plusmn; 1.03</td><td>17 / 0.094 kB</td><td class="bad">60.8 / 1.61</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="notes">
+      Mean &plusmn; standard deviation over 500 held-out test scenarios simulated on the true plant; IPOPT
+      losses are numerically zero and given as means. Horizons are 1000, 50 and 100 steps; task loss is
+      the MSE over the final 100 steps of each 250-step reference segment, the final 10 steps, and the
+      terminal state, respectively. Control effort is \(\sum_t\|u_t\|_1\). Time is per control step; for
+      IPOPT it is the solve time divided by \(N\). Memory is parameter storage for the learned policies and
+      the resident memory added by each solve for IPOPT. Violations give the percentage of scenarios with
+      any state-constraint violation and the maximum violation depth. NN-Distilled uses the terms
+      retained by SD-DPC, fitted by unregularized least squares. The IPOPT benchmark is solved per
+      scenario with exact model knowledge, so it is a performance reference rather than a competitor.
+    </p>
+  </div>
+</section>
+
+<section id="code">
+  <div class="wrap">
+    <div class="eyebrow">Code</div>
+    <h2 class="sec">Reproduce any case in four commands</h2>
+    <p class="lede" style="margin-top:14px">
+      The repository ships paper configs, publication checkpoints and four tutorial notebooks per case,
+      built on <a href="https://github.com/pnnl/neuromancer" target="_blank" rel="noopener">Neuromancer&nbsp;1.5.3</a>,
+      PyTorch&nbsp;2.6 and CasADi.
+    </p>
+    <div class="bib" style="margin-top:22px">
+      <button class="copy" data-copy="#shell">Copy</button>
+      <pre id="shell"><code>git clone https://github.com/SOLARIS-JHU/SD-DPC.git &amp;&amp; cd SD-DPC
+python3.10 -m venv .venv &amp;&amp; source .venv/bin/activate &amp;&amp; pip install -e .
+
+CASE=TwoTank                             # or VanDerPol, DoubleIntegrator
+python scripts/$CASE/system_id.py        # 1. sparse dynamics + debias refit
+python scripts/$CASE/train_sd_dpc.py     # 2. sparse dictionary policy
+python scripts/$CASE/train_nn_dpc.py     # 3. neural DPC baseline
+python scripts/$CASE/evaluation.py       # 4. evaluate on the true plant</code></pre>
+    </div>
+  </div>
+</section>
+
+<section id="bibtex">
+  <div class="wrap narrow">
+    <div class="eyebrow">Citation</div>
+    <h2 class="sec">BibTeX</h2>
+    <div class="bib">
+      <button class="copy" data-copy="#bib">Copy</button>
+      <pre id="bib"><code>@article{garmroodi2026sd,
+  title   = {SD-DPC: Sparse Dictionary Differentiable Predictive Control},
+  author  = {Garmroodi, Ali Reza Daneshvar and Drgo{\v{n}}a, Jan},
+  journal = {arXiv preprint arXiv:2610.02466},
+  year    = {2026}
+}</code></pre>
+    </div>
+    <p class="notes">
+      This research is supported by the U.S. DOE, Office of Science, ASCR program under the SciDAC
+      Institute &ldquo;LEADS: LEarning-Accelerated Domain Science&rdquo;.
+    </p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>&copy; 2026 Ali Reza Daneshvar Garmroodi &amp; Jan Drgo&#328;a</span>
+    <span>
+      Built on the <a href="https://github.com/eliahuhorwitz/Academic-project-page-template" target="_blank" rel="noopener">Academic Project Page Template</a>,
+      adopted from <a href="https://nerfies.github.io" target="_blank" rel="noopener">Nerfies</a>.
+      Licensed <a href="http://creativecommons.org/licenses/by-sa/4.0/" rel="license" target="_blank">CC BY-SA 4.0</a>.
+    </span>
+  </div>
+</footer>
+
+<script>
+// case-study tabs
+document.querySelectorAll('.tab').forEach(function (tab) {
+  tab.addEventListener('click', function () {
+    document.querySelectorAll('.tab').forEach(function (t) { t.setAttribute('aria-selected', String(t === tab)); });
+    document.querySelectorAll('.panel').forEach(function (p) {
+      p.dataset.active = String(p.dataset.panel === tab.dataset.tab);
+    });
+  });
+});
+// copy buttons
+document.querySelectorAll('.copy').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var text = document.querySelector(btn.dataset.copy).innerText;
+    navigator.clipboard.writeText(text).then(function () {
+      btn.textContent = 'Copied';
+      setTimeout(function () { btn.textContent = 'Copy'; }, 1600);
+    });
+  });
+});
+</script>
+</body>
+</html>
