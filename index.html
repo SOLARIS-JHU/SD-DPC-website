@@ -62,21 +62,6 @@
 </head>
 <body>
 
-<nav class="nav">
-  <div class="wrap">
-    <span class="brand">SD&#8209;DPC</span>
-    <ul>
-      <li><a href="#abstract">Abstract</a></li>
-      <li><a href="#method">Method</a></li>
-      <li><a href="#training">Training</a></li>
-      <li><a href="#cases">Case studies</a></li>
-      <li><a href="#results">Results</a></li>
-      <li><a href="#code">Code</a></li>
-      <li><a href="#bibtex">BibTeX</a></li>
-    </ul>
-  </div>
-</nav>
-
 <header class="hero">
   <div class="wrap">
     <div class="badges">
@@ -161,12 +146,12 @@
 
 <section id="method">
   <div class="wrap">
-    <div class="eyebrow">Method</div>
+    <div class="eyebrow">Methodology</div>
     <h2 class="sec">Two sparse stages, one thresholded gradient procedure</h2>
     <p class="lede" style="margin-top:14px">
-      The prediction model and the feedback law are both sparse expansions over explicit
-      dictionaries, and both are sparsified by the same sequentially thresholded gradient descent.
-      Nothing in the pipeline imitates a pretrained controller.
+      The prediction model and the feedback law are both sparse expansions over explicit dictionaries,
+      and both are sparsified by the same sequentially thresholded gradient descent. Nothing in the
+      pipeline imitates a pretrained controller.
     </p>
 
     <div class="fig-side">
@@ -176,185 +161,131 @@
         </a>
       </figure>
       <div>
-        <div class="grid c2" style="margin-top:0">
-          <div class="card">
-            <span class="num">STAGE 01</span>
-            <h3>Rollout-based sparse identification</h3>
-            <p>The dynamics are fit from multistep rollout error instead of state derivatives, so numerical
-            differentiation never enters the objective. With a one-step horizon and an Euler step it
-            collapses back to standard &#8467;<sub>1</sub>-SINDy.</p>
-          </div>
-          <div class="card">
-            <span class="num">STAGE 02</span>
-            <h3>Sparse dictionary policy</h3>
-            <p>The policy is a dictionary expansion projected onto the admissible inputs, so input bounds
-            hold by construction and each channel keeps its own subset of terms.</p>
+        <div class="card">
+          <span class="num">Stage 01 &mdash; identification</span>
+          <h3>Sparse dynamics from rollout error</h3>
+          <p>The dynamics are fit from multistep rollout error instead of state derivatives, so numerical
+          differentiation never enters the objective. With a one-step horizon and an Euler step the
+          formulation collapses back to standard &#8467;<sub>1</sub>-SINDy.</p>
+          <div class="dyn">
+            $$\min_{\Xi}\ \frac{1}{m_{\mathrm{id}}}\sum_{j}\Big(Q_1\|x_1^j-\hat x_1^j\|_2^2+Q_N\!\!\sum_{k=2}^{N_{\mathrm{id}}}\!\|x_k^j-\hat x_k^j\|_2^2\Big)+\lambda\|\Xi\|_1$$
           </div>
         </div>
-        <div class="policy">
-          <div class="label">closed-loop policy objective</div>
-          $$\min_{\Xi_{\pi}}\ \frac{1}{m}\sum_{j=1}^{m}\Big(\sum_{t=1}^{N}\ell_{\mathrm{DPC}}(x_t,u_{t-1},\psi_t)+\ell_N(x_N,\psi_N)\Big)+\lambda_\pi\|\Xi_\pi\|_1$$
-          $$x_{t+1}=F_{\Xi}(x_t,u_t),\qquad u_t=\pi_{\Xi_\pi}(z_t)=\Pi_{\mathcal U}\big(\Theta_\pi(z_t)\,\Xi_\pi\big)$$
+        <div class="card" style="margin-top:18px">
+          <span class="num">Stage 02 &mdash; policy</span>
+          <h3>Dictionary policy, trained through the model</h3>
+          <p>The policy is a dictionary expansion projected onto the admissible inputs, so input bounds
+          hold by construction and each channel keeps its own subset of terms.</p>
+          <div class="dyn">
+            $$\min_{\Xi_{\pi}}\ \frac{1}{m}\sum_{j}\Big(\sum_{t=1}^{N}\ell_{\mathrm{DPC}}(x_t,u_{t-1},\psi_t)+\ell_N(x_N,\psi_N)\Big)+\lambda_\pi\|\Xi_\pi\|_1$$
+            $$x_{t+1}=F_{\Xi}(x_t,u_t),\qquad u_t=\Pi_{\mathcal U}\big(\Theta_\pi(z_t)\,\Xi_\pi\big)$$
+          </div>
         </div>
       </div>
     </div>
 
     <div class="grid c3">
       <div class="card">
-        <span class="num">GRADIENTS THROUGH SATURATION</span>
+        <span class="num">Gradients through saturation</span>
         <h3>A leaky projection surrogate</h3>
         <p>The forward pass evaluates the true saturated loop; the backward pass uses a banded, leaky
         derivative so coefficients feeding a saturated channel are neither silenced nor credited with
         sensitivity the plant does not have.</p>
       </div>
       <div class="card">
-        <span class="num">FINITE TERMINATION</span>
+        <span class="num">Finite termination</span>
         <h3>Pruning that provably stops</h3>
         <p>A pruned coefficient never returns, so the retained set changes at most \(pn\) times and the
-        thresholding loop terminates within \(n_pM(pn+1)\) epochs &mdash; for any loss.</p>
+        thresholding loop terminates within \(n_pM(pn+1)\) epochs &mdash; for any loss. A debiasing refit
+        then drops the &#8467;<sub>1</sub> penalty and re-tunes only the surviving coefficients.</p>
       </div>
       <div class="card">
-        <span class="num">EXPLICIT SENSITIVITY</span>
+        <span class="num">Explicit sensitivity</span>
         <h3>Lipschitz bounds from coefficients</h3>
-        <p>\(L_\pi\) is read off the retained coefficients and the library slopes. On the benchmarks the
-        certificate is conservative by a factor of at most 1.7 &mdash; no layer-norm products or SDP
-        relaxations needed.</p>
+        <p>\(L_\pi\) is read off the retained coefficients and the library slopes, and bounds how far
+        pruning or model mismatch can move the closed-loop trajectory &mdash; no layer-norm products or
+        SDP relaxations needed.</p>
       </div>
     </div>
-  </div>
-</section>
 
-<section id="training">
-  <div class="wrap">
-    <div class="eyebrow">Training dynamics</div>
-    <h2 class="sec">Watch the policy get sparse</h2>
-    <p class="lede" style="margin-top:14px">
-      Closed-loop states, the control signal, and the coefficient matrix during sparse policy
-      learning on the Van der Pol oscillator. Pruned terms stay visible with their coefficients
-      pinned at zero &mdash; by the end, three terms carry the whole controller.
+    <h3 class="sub">Case studies</h3>
+    <p class="lede">
+      Three benchmarks exercise different parts of the framework: constrained reference tracking,
+      stabilization of an unstable equilibrium, and a nonlinear state constraint. In every case the
+      policy is trained on the identified model \(F_\Xi\) and then evaluated on the true plant, so the
+      reported results include model mismatch.
     </p>
-    <figure>
-      <video controls muted loop playsinline preload="metadata" poster="static/images/policy_evolution_preview.gif">
-        <source src="static/videos/policy_evolution.mp4" type="video/mp4">
-      </video>
-      <figcaption>Sequential thresholding during SD-DPC policy training. After the retained set
-      stabilizes, a debiasing refit drops the &#8467;<sub>1</sub> penalty and re-tunes only the surviving coefficients.</figcaption>
-    </figure>
 
-    <div class="fig-side" style="margin-top:44px">
-      <div>
-        <h3 style="font-size:1.15rem;margin-bottom:10px">The price of sparsity is system dependent</h3>
-        <p style="color:var(--ink-2);margin:0">
-          The retained terms depend jointly on the &#8467;<sub>1</sub> weight \(\lambda_\pi\) and the pruning threshold
-          \(\tau_\pi\). We keep the sparsest policy whose validation performance is not degraded relative
-          to the dense end of the sweep. For the Van der Pol oscillator the loss is flat across the
-          sweep; for the two-tank system it degrades once \(\lambda_\pi\) is pushed past the selected point.
-        </p>
+    <div class="grid c3">
+      <div class="card case">
+        <span class="tag">01 &middot; Two-tank</span>
+        <h3>Constrained level tracking</h3>
+        <p>A pump feeds an upper tank that drains by gravity into a lower one. The two states are the
+        liquid levels; the inputs are the pump command and the valve split.</p>
+        <div class="dyn">
+          $$\begin{aligned}\dot x_1&=c_1(1-u_2)u_1-c_2\sqrt{x_1}\\ \dot x_2&=c_1u_2u_1+c_2\sqrt{x_1}-c_2\sqrt{x_2}\end{aligned}$$
+        </div>
+        <ul>
+          <li><strong>Task:</strong> track time-varying level references</li>
+          <li><strong>Constraints:</strong> levels in \([0,1]\), inputs in \([0,1]^2\)</li>
+          <li><strong>Loss:</strong> tracking error plus hinge penalties on the level bounds</li>
+        </ul>
       </div>
-      <figure class="plain">
-        <img src="static/images/sweeps.png" alt="Policy sparsity versus the l1 weight, with validation loss encoded by color and the selected policies circled">
-      </figure>
+
+      <div class="card case">
+        <span class="tag">02 &middot; Van der Pol</span>
+        <h3>Suppressing a limit cycle</h3>
+        <p>The forced oscillator converges to an attracting limit cycle around an unstable origin. One
+        input, relative degree two; initial conditions are sampled on and off the cycle.</p>
+        <div class="dyn">
+          $$\dot x_1=x_2,\qquad \dot x_2=\mu(1-x_1^2)x_2-x_1+u,\qquad \mu=1$$
+        </div>
+        <ul>
+          <li><strong>Task:</strong> regulate the state to the unstable origin</li>
+          <li><strong>Constraints:</strong> \(|u|\le5\), \(|x_i|\le5\)</li>
+          <li><strong>Loss:</strong> state cost plus state- and input-increment penalties</li>
+        </ul>
+      </div>
+
+      <div class="card case">
+        <span class="tag">03 &middot; 2-D integrator</span>
+        <h3>Reaching past an obstacle</h3>
+        <p>A planar integrator whose dynamics are linear and decoupled, so the entire difficulty lies in
+        a nonlinear state constraint that excludes a disc from the state space.</p>
+        <div class="dyn">
+          $$x_{t+1}=x_t+u_t,\qquad h_{\mathrm{obs}}(x)=\|x-x^o\|^2-(p_o/2)^2\ \ge\ 0$$
+        </div>
+        <ul>
+          <li><strong>Task:</strong> reach a terminal setpoint whose direct path is blocked</li>
+          <li><strong>Constraints:</strong> bounded inputs, circle of radius 1.5 at the origin</li>
+          <li><strong>Loss:</strong> effort and increment costs, a hinge on \(h_{\mathrm{obs}}\), and a
+          terminal term evaluating the policy at the target</li>
+        </ul>
+      </div>
     </div>
 
-    <figure>
-      <img src="static/images/identification.png" alt="Held-out rollouts of the identified sparse dynamics for the two-tank, Van der Pol, and 2-D integrator systems">
-      <figcaption>Held-out rollouts of the identified models. Over \(N=50\) steps the mean-squared errors are
-      \(7.64\times10^{-10}\), \(3.30\times10^{-8}\) and \(4.71\times10^{-7}\), with maximum absolute state error
-      below \(1.37\times10^{-3}\). Policies are trained on these models and then evaluated on the true plants,
-      so every reported number includes model mismatch.</figcaption>
-    </figure>
-  </div>
-</section>
-
-<section id="cases">
-  <div class="wrap">
-    <div class="eyebrow">Case studies</div>
-    <h2 class="sec">Three problems, three readable controllers</h2>
-
-    <div class="tabs" role="tablist">
-      <button class="tab" role="tab" aria-selected="true" data-tab="tt">Two-tank tracking</button>
-      <button class="tab" role="tab" aria-selected="false" data-tab="vdp">Van der Pol</button>
-      <button class="tab" role="tab" aria-selected="false" data-tab="di">Obstacle avoidance</button>
-    </div>
-
-    <div class="panel" data-panel="tt" data-active="true">
-      <div class="meta">
-        <span class="chip">constrained level tracking</span>
-        <span class="chip">2 states &middot; 2 inputs</span>
-        <span class="chip">6 retained terms (4 + 2)</span>
+    <h3 class="sub">Baselines and evaluation protocol</h3>
+    <div class="grid c3">
+      <div class="card">
+        <span class="num">IPOPT</span>
+        <p>An optimization benchmark solved per scenario with <em>exact</em> model knowledge and the same
+        costs &mdash; a performance reference, not a competitor.</p>
       </div>
-      <p style="color:var(--ink-2);max-width:72ch">
-        A pump feeds an upper tank that drains into a lower one. The policy tracks time-varying level
-        references while respecting level bounds, and beats the neural DPC policy by roughly
-        <strong>12&times;</strong> in tracking loss. Distilling onto the same six terms leaves a steady offset
-        and 17&times; the error.
-      </p>
-      <div class="policy">
-        <div class="label">learned raw channel outputs, \(u=\Pi_{[0,1]^2}(v)\)</div>
-        $$\begin{aligned}
-        v_1 &= 0.6198\,r + 1.4659\cos 2x_1 + 2.1415\cos 2x_2 - 3.4944\cos 2r,\\
-        v_2 &= -4.2401\cos 2x_1 + 4.2429\cos 2x_2.
-        \end{aligned}$$
+      <div class="card">
+        <span class="num">NN-DPC</span>
+        <p>A deep policy (two hidden layers, 32 ReLU units) trained by the same closed-loop objective on
+        the same identified model: the standard DPC parameterization.</p>
       </div>
-      <p style="color:var(--ink-3);font-size:.92rem">
-        The pump command mixes a reference feedforward with feedback on both levels; the two nearly
-        equal valve coefficients open the valve only when the upper tank is fuller than the lower one.
-      </p>
-    </div>
-
-    <div class="panel" data-panel="vdp">
-      <div class="meta">
-        <span class="chip">limit-cycle suppression</span>
-        <span class="chip">2 states &middot; 1 input</span>
-        <span class="chip">3 retained terms</span>
+      <div class="card">
+        <span class="num">NN-Distilled</span>
+        <p>A sparse policy regressed onto NN-DPC's actions, restricted to the terms SD-DPC retained, so
+        the two differ only in how the coefficients on a common support are obtained.</p>
       </div>
-      <p style="color:var(--ink-2);max-width:72ch">
-        The uncontrolled oscillator converges to an attracting limit cycle around an unstable origin.
-        SD-DPC stabilizes the origin from initial conditions on and off the cycle, matching the neural
-        policy's loss with three terms &mdash; and the resulting closed loop is simple enough to analyze
-        by hand.
-      </p>
-      <div class="policy">
-        <div class="label">closed-form stability certificate</div>
-        $$V=\tfrac12(1-\kappa_1)x_1^2+\tfrac12x_2^2,\qquad
-        \dot V=(\mu+\kappa_2)x_2^2-(\mu-\kappa_3)x_1^2x_2^2\le 0$$
-        $$\text{for }\ \kappa_1<1,\ \ \kappa_2<-\mu,\ \ \kappa_3\le\mu
-        \quad\text{(all satisfied by the learned }\kappa\text{)}$$
-      </div>
-      <p style="color:var(--ink-3);font-size:.92rem">
-        Because the model and the policy are finite expansions over analytic libraries, the unsaturated
-        closed loop is available in closed form: the learned coefficients render the origin globally
-        asymptotically stable.
-      </p>
-    </div>
-
-    <div class="panel" data-panel="di">
-      <div class="meta">
-        <span class="chip">nonlinear state constraint</span>
-        <span class="chip">2 states &middot; 2 inputs</span>
-        <span class="chip">12 retained terms (8 + 4)</span>
-      </div>
-      <p style="color:var(--ink-2);max-width:72ch">
-        A planar integrator must reach a setpoint whose direct path is blocked by a circular obstacle.
-        SD-DPC steers around it from every sampled initial condition, with cumulative control effort
-        within <strong>0.6%</strong> of the IPOPT optimum. The distilled policy on the same terms violates the
-        obstacle in <strong>60.8%</strong> of scenarios &mdash; which is the point of the example.
-      </p>
-      <div class="policy">
-        <div class="label">why imitation gives no safety guarantee</div>
-        $$\varepsilon_\pi\ge 0.35 \ \Rightarrow\ \text{teacher margin needed } h_{\mathrm{obs}}\ge L_hL_u\varepsilon_\pi\ge 1.05,
-        \qquad \text{actual margin } 0.06$$
-      </div>
-      <p style="color:var(--ink-3);font-size:.92rem">
-        The imitation error is small on the states the teacher visits, where the regression data lie, but
-        grows on the states the student visits. A near-optimal teacher clears the obstacle by only 0.06,
-        so no margin is left to absorb it.
-      </p>
     </div>
   </div>
 </section>
 
-<section id="results">
+<section id="results" class="tint">
   <div class="wrap">
     <div class="eyebrow">Results</div>
     <h2 class="sec">Constraints met, two orders of magnitude smaller</h2>
@@ -364,6 +295,15 @@
       policy and 18&ndash;26&nbsp;MiB per IPOPT solve.
     </p>
 
+    <h3 class="sub">Identified models</h3>
+    <figure>
+      <img src="static/images/identification.png" alt="Held-out rollouts of the identified sparse dynamics for the two-tank, Van der Pol, and 2-D integrator systems">
+      <figcaption>Held-out rollouts of the identified models. Over \(N=50\) steps the mean-squared errors are
+      \(7.64\times10^{-10}\), \(3.30\times10^{-8}\) and \(4.71\times10^{-7}\), with maximum absolute state error
+      below \(1.37\times10^{-3}\).</figcaption>
+    </figure>
+
+    <h3 class="sub">Closed-loop evaluation</h3>
     <figure>
       <a href="static/pdfs/evaluation.pdf" target="_blank" rel="noopener">
         <img src="static/images/evaluation.png" alt="Closed-loop trajectories of SD-DPC, NN-DPC, NN-Distilled and the IPOPT benchmark for the three case studies, with retained SD-DPC coefficients">
@@ -413,22 +353,112 @@
       IPOPT it is the solve time divided by \(N\). Memory is parameter storage for the learned policies and
       the resident memory added by each solve for IPOPT. Violations give the percentage of scenarios with
       any state-constraint violation and the maximum violation depth. NN-Distilled uses the terms
-      retained by SD-DPC, fitted by unregularized least squares. The IPOPT benchmark is solved per
-      scenario with exact model knowledge, so it is a performance reference rather than a competitor.
+      retained by SD-DPC, fitted by unregularized least squares.
     </p>
-  </div>
-</section>
 
-<section id="code">
-  <div class="wrap">
-    <div class="eyebrow">Code</div>
-    <h2 class="sec">Reproduce any case in four commands</h2>
-    <p class="lede" style="margin-top:14px">
-      The repository ships paper configs, publication checkpoints and four tutorial notebooks per case,
-      built on <a href="https://github.com/pnnl/neuromancer" target="_blank" rel="noopener">Neuromancer&nbsp;1.5.3</a>,
-      PyTorch&nbsp;2.6 and CasADi.
+    <h3 class="sub">The learned policies</h3>
+    <p class="lede">Each controller below is the complete feedback law, printed in full.</p>
+
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" aria-selected="true" data-tab="tt">Two-tank</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="vdp">Van der Pol</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="di">2-D integrator</button>
+    </div>
+
+    <div class="panel" data-panel="tt" data-active="true">
+      <p style="color:var(--ink-2);max-width:74ch">
+        Six terms across the two channels. Tracking loss is about <strong>12&times;</strong> lower than NN-DPC &mdash;
+        a gap well beyond the scenario-to-scenario spread &mdash; so sparsity costs nothing in accuracy here.
+        Distilling onto the same six terms leaves a steady offset and about 17&times; the error.
+      </p>
+      <div class="policy">
+        <div class="label">raw channel outputs, \(u=\Pi_{[0,1]^2}(v)\)</div>
+        $$\begin{aligned}
+        v_1 &= 0.6198\,r + 1.4659\cos 2x_1 + 2.1415\cos 2x_2 - 3.4944\cos 2r,\\
+        v_2 &= -4.2401\cos 2x_1 + 4.2429\cos 2x_2.
+        \end{aligned}$$
+      </div>
+      <p style="color:var(--ink-3);font-size:.92rem;margin-top:14px">
+        The pump command mixes a reference feedforward with feedback on both levels; the two nearly equal
+        valve coefficients open the valve only when the upper tank is fuller than the lower one.
+      </p>
+    </div>
+
+    <div class="panel" data-panel="vdp">
+      <p style="color:var(--ink-2);max-width:74ch">
+        Three terms, with a loss comparable to the neural policy &mdash; and a closed loop simple enough to
+        analyze by hand.
+      </p>
+      <div class="policy">
+        <div class="label">policy and closed-form stability certificate</div>
+        $$u=\Pi_{[-5,5]}\big(\kappa_1x_1+\kappa_2x_2+\kappa_3x_1^2x_2\big),\qquad
+        \kappa=(-0.9873,\,-2.8860,\,0.2716)$$
+        $$V=\tfrac12(1-\kappa_1)x_1^2+\tfrac12x_2^2,\qquad
+        \dot V=(\mu+\kappa_2)x_2^2-(\mu-\kappa_3)x_1^2x_2^2\le 0$$
+      </div>
+      <p style="color:var(--ink-3);font-size:.92rem;margin-top:14px">
+        Because the model and the policy are finite expansions over analytic libraries, the unsaturated
+        closed loop is available in closed form: the conditions \(\kappa_1<1\), \(\kappa_2<-\mu\),
+        \(\kappa_3\le\mu\) hold for the learned coefficients, so the origin is globally asymptotically stable.
+      </p>
+    </div>
+
+    <div class="panel" data-panel="di">
+      <p style="color:var(--ink-2);max-width:74ch">
+        Twelve terms steer around the obstacle from every sampled initial condition, with cumulative control
+        effort within <strong>0.6%</strong> of the IPOPT optimum. The distilled policy on the same terms violates
+        the obstacle in <strong>60.8%</strong> of scenarios &mdash; which is the point of this case.
+      </p>
+      <div class="policy">
+        <div class="label">why imitation carries no safety guarantee</div>
+        $$\varepsilon_\pi\ge 0.35\ \Longrightarrow\ \text{teacher margin needed }\ h_{\mathrm{obs}}\ge L_hL_u\varepsilon_\pi\ge 1.05,
+        \qquad\text{actual margin }0.06$$
+      </div>
+      <p style="color:var(--ink-3);font-size:.92rem;margin-top:14px">
+        The imitation error is small on the states the teacher visits, where the regression data lie, but
+        grows on the states the student visits. A near-optimal teacher clears the obstacle by only 0.06, so
+        no margin is left to absorb it.
+      </p>
+    </div>
+
+    <h3 class="sub">Training dynamics</h3>
+    <div class="fig-side">
+      <figure>
+        <video controls muted loop playsinline preload="metadata" poster="static/images/policy_evolution_preview.gif">
+          <source src="static/videos/policy_evolution.mp4" type="video/mp4">
+        </video>
+      </figure>
+      <div>
+        <p style="color:var(--ink-2)">
+          Closed-loop states, the control signal, and the coefficient matrix during sparse policy learning
+          on the Van der Pol oscillator. Pruned terms stay visible with their coefficients pinned at zero;
+          by the end, three terms carry the whole controller.
+        </p>
+        <p style="color:var(--ink-2)">
+          The retained terms depend jointly on the &#8467;<sub>1</sub> weight \(\lambda_\pi\) and the threshold
+          \(\tau_\pi\). We keep the sparsest policy whose validation performance is not degraded relative to
+          the dense end of the sweep. For the Van der Pol oscillator the loss is flat across the sweep; for
+          the two-tank system it degrades once \(\lambda_\pi\) is pushed past the selected point.
+        </p>
+      </div>
+    </div>
+    <figure>
+      <img src="static/images/sweeps.png" alt="Policy sparsity versus the l1 weight, with validation loss encoded by color and the selected policies circled">
+      <figcaption>Policy sparsity versus the &#8467;<sub>1</sub> weight \(\lambda_\pi\). Marker shape denotes the pruning
+      threshold \(\tau_\pi\), color shows the validation loss used for selection, and black circles indicate the
+      selected policies.</figcaption>
+    </figure>
+
+    <h3 class="sub">Certified sensitivity</h3>
+    <p class="lede">
+      Weighting each retained coefficient by the slope of its library function certifies
+      \(L_\pi\le18.4\), \(16.0\) and \(0.32\) for the three systems, whereas the largest \(\|\partial_x\pi\|\)
+      found by automatic differentiation on a dense grid is \(12.0\), \(9.4\) and \(0.19\) &mdash; the certificate is
+      conservative by a factor of at most 1.7, and the pruning bound held at every prune.
     </p>
-    <div class="bib" style="margin-top:22px">
+
+    <h3 class="sub">Reproducing</h3>
+    <div class="bib">
       <button class="copy" data-copy="#shell">Copy</button>
       <pre id="shell"><code>git clone https://github.com/SOLARIS-JHU/SD-DPC.git &amp;&amp; cd SD-DPC
 python3.10 -m venv .venv &amp;&amp; source .venv/bin/activate &amp;&amp; pip install -e .
@@ -439,6 +469,11 @@ python scripts/$CASE/train_sd_dpc.py     # 2. sparse dictionary policy
 python scripts/$CASE/train_nn_dpc.py     # 3. neural DPC baseline
 python scripts/$CASE/evaluation.py       # 4. evaluate on the true plant</code></pre>
     </div>
+    <p class="notes">
+      Paper configs, publication checkpoints and four tutorial notebooks per case are included, built on
+      <a href="https://github.com/pnnl/neuromancer" target="_blank" rel="noopener">Neuromancer&nbsp;1.5.3</a>,
+      PyTorch&nbsp;2.6 and CasADi.
+    </p>
   </div>
 </section>
 
